@@ -106,11 +106,35 @@ jobs:
         with:
           context: ./frontend
           push: true
-          tags: routparesh/jerney-frontend:latest
+          tags: |
+            routparesh/jerney-frontend:latest
+            routparesh/jerney-frontend:${{ github.sha }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: ./backend
           push: true
-          tags: routparesh/jerney-backend:latest
+          tags: |
+            routparesh/jerney-backend:latest
+            routparesh/jerney-backend:${{ github.sha }}
+
+  trivy-scan:
+    name: Trivy Scan
+    needs: docker-build-push
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@0.33.1
+        with:
+          image-ref: |
+            'routparesh/jerney-frontend:${{ github.sha }}'
+            'routparesh/jerney-backend:${{ github.sha }}'
+
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
