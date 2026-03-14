@@ -126,13 +126,20 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy frontend Image vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: |
-            'routparesh/jerney-frontend:${{ github.sha }}'
-            'routparesh/jerney-backend:${{ github.sha }}'
+          image-ref: 'routparesh/jerney-frontend:${{ github.sha }}'
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
 
+      - name: Run Trivy backend Image vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'routparesh/jerney-backend:${{ github.sha }}'
           format: 'table'
           exit-code: '1'
           ignore-unfixed: true
